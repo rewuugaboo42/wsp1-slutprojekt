@@ -1,13 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projekt #2</title>
-    <link rel="stylesheet" type="text/css" href="/style.css?<%=Time.now.to_i%>">
-</head>
-<body>
-  <h1>Webbserverprogrammering 1 - Slutprojekt</h1>
-  <img src="/img/glhf.png">
-</body>
-</html>
+<h1>Products</h1>
+
+<div class="products">
+  <% @products.each do |product| %>
+    <div class="product-card">
+      <h2><%= product["name"] %></h2>
+      <p class="description"><%= product["description"] %></p>
+      <p class="price"><%= product["price"] %> kr</p>
+
+      <form action="/cart/add" method="post">
+        <input type="hidden" name="product_id" value="<%= product["product_id"] %>">
+        <button type="submit">Add to cart</button>
+      </form>
+    </div>
+  <% end %>
+</div>

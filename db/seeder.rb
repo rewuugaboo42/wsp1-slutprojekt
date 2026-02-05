@@ -164,6 +164,7 @@ class Seeder
       db
     end
   end
+  
 end
 
 Seeder.seed!

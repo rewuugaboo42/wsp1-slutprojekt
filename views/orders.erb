@@ -1,0 +1,13 @@
+<h1>Your orders</h1>
+
+<% if @orders.empty? %>
+  <p>No orders yet.</p>
+<% else %>
+  <% @orders.each do |order| %>
+    <div class="order">
+      <h3>Order #<%= order["order_id"] %></h3>
+      <p>Status: <%= order["status"] %></p>
+      <p>Total: <%= order["total_price"] %> kr</p>
+    </div>
+  <% end %>
+<% end %>
