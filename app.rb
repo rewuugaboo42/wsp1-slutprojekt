@@ -1,5 +1,6 @@
 require 'debug'
 require "awesome_print"
+require 'bcrypt'
 
 class App < Sinatra::Base
   enable :sessions
@@ -37,7 +38,7 @@ class App < Sinatra::Base
 
     user = db.execute("SELECT * FROM users WHERE email = ?", login_email).first
     
-    if user && user["password_hash"] == login_password
+    if user && BCrypt::Password.new(user["password_hash"]) == login_password
       session[:user_id] = user["user_id"]
       redirect '/'
     else
@@ -61,8 +62,10 @@ class App < Sinatra::Base
       @error = "Username or email already exists"
       erb :signup
     else
-      db.execute("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", [signup_username, signup_email, signup_password])
-    end
+      password_hash = BCrypt::Password.create(signup_password)
+
+      db.execute("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", [signup_username, signup_email, password_hash])
+    end   
 
     redirect '/login'
   end
