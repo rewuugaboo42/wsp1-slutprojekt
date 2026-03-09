@@ -3,12 +3,12 @@
 <div class="products">
   <% @products.each do |product| %>
     <div class="product-card">
-      <h2><%= product["name"] %></h2>
-      <p class="description"><%= product["description"] %></p>
-      <p class="price"><%= product["price"] %> kr</p>
+      <h2><%= product.name %></h2>
+      <p class="description"><%= product.description %></p>
+      <p class="price"><%= product.price %> kr</p>
 
       <form action="/cart/add" method="post">
-        <input type="hidden" name="product_id" value="<%= product["product_id"] %>">
+        <input type="hidden" name="product_id" value="<%= product.product_id %>">
         <button type="submit">Add to cart</button>
       </form>
     </div>
