@@ -1,4 +1,5 @@
 require 'sqlite3'
+require 'bcrypt'
 
 class Seeder
 
@@ -30,7 +31,8 @@ class Seeder
         username TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        role TEXT DEFAULT 'user'
       );
     SQL
 
@@ -101,12 +103,19 @@ class Seeder
   end
 
   def self.populate_tables
-    db.execute <<~SQL
-      INSERT INTO users (username, email, password_hash)
-      VALUES
-      ('Albert Westman', 'albert.pj.westman@gmail.com', 'hashed_password_here'),
-      ('Emma Svensson', 'emma@example.com', 'another_hash_here');
-    SQL
+    users = [
+      ['Albert Westman', 'albert.pj.westman@gmail.com', '1234', 'admin'],
+      ['Emma Svensson', 'emma@example.com', '5678', 'user']
+    ]
+
+    users.each do |username, email, password, role|
+      hash = BCrypt::Password.create(password)
+
+      db.execute(
+        "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)",
+        [username, email, hash, role]
+      )
+    end
 
     db.execute <<~SQL
       INSERT INTO categories (name)

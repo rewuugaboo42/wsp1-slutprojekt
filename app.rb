@@ -109,6 +109,19 @@ class App < Sinatra::Base
     erb :orders
   end
 
+  get '/admin' do
+    user = nil
+
+    if session[:user_id]
+      row = db.execute("SELECT * FROM users WHERE user_id = ?", [session[:user_id]]).first
+      user = User.new(row) if row
+    end
+
+    redirect '/' unless user && user.admin?
+
+    erb :admin
+  end
+
   get '/logout' do
     session.clear
     redirect '/'
