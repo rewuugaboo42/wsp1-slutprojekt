@@ -1,0 +1,13 @@
+<h1>Edit Product</h1>
+
+<form action="/products/<%= @product.product_id %>/update" method="post">
+  <input type="text" name="name" value="<%= @product.name %>">
+
+  <input type="text" name="description" value="<%= @product.description %>">
+
+  <input type="number" name="price" value="<%= @product.price %>">
+
+  <input type="text" name="image_url" value="<%= @product.image_url %>">
+
+  <button type="submit">Update Product</button>
+</form>

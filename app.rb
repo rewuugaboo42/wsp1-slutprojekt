@@ -16,8 +16,6 @@ class App < Sinatra::Base
 
   setup_development_features(self)
 
-  # Funktion för att prata med databasen
-  # Exempel på användning: db.execute('SELECT * FROM fruits')
   def db
     return @db if @db
     @db = SQLite3::Database.new(DB_PATH)
@@ -26,14 +24,25 @@ class App < Sinatra::Base
     return @db
   end
 
-  # Routen /
-  get '/' do
+  get '/products' do
     @products = Product.all(db)
-    erb :index
+    user = nil
+
+    if session[:user_id]
+      row = db.execute("SELECT * FROM users WHERE user_id = ?", [session[:user_id]]).first
+      user = User.new(row) if row
+    end
+
+    if user && user.admin?
+      @admin = true
+    else
+      @admin = false
+    end
+    erb (:"product/index")
   end
 
   get '/login' do
-    erb :login
+    erb (:"user/login")
   end
 
   post '/login' do
@@ -44,15 +53,15 @@ class App < Sinatra::Base
     
     if user && BCrypt::Password.new(user.password_hash) == login_password
       session[:user_id] = user.user_id
-      redirect '/'
+      redirect '/products'
     else
       @error = "Wrong email or password"
-      erb :login
+      erb (:"user/login")
     end
   end
 
   get '/signup' do
-    erb :signup
+    erb (:"user/signup")
   end
 
   post '/signup' do
@@ -64,7 +73,7 @@ class App < Sinatra::Base
 
     if user
       @error = "Username or email already exists"
-      return erb :signup
+      return erb (:"user/signup")
     else
       User.create(signup_username, signup_email, signup_password, db)
       redirect '/login'
@@ -77,7 +86,7 @@ class App < Sinatra::Base
     cart = Cart.find_or_create_by_user(session[:user_id], db)
     @cart_items = cart.items(db)
 
-    erb :cart
+    erb (:"cart/cart")
   end
 
   post '/cart/add' do
@@ -90,6 +99,55 @@ class App < Sinatra::Base
     cart.add_item(product_id, quantity, db)
 
     redirect '/cart'
+  end
+
+  post '/cart/delete' do
+    redirect '/login' unless session[:user_id]
+
+    product_id = params["product_id"].to_i
+
+    cart = Cart.find_or_create_by_user(session[:user_id], db)
+    cart.remove_item(product_id, db)
+
+    redirect '/cart'
+  end
+
+  get '/products/new' do
+    redirect '/login' unless session[:user_id]
+    erb (:"product/new")
+  end
+
+  post '/products' do
+    redirect '/login' unless session[:user_id]
+
+    Product.add(db, params)
+
+    redirect '/products'
+  end
+
+  get '/products/:id/edit' do
+    redirect '/login' unless session[:user_id]
+
+    @product = Product.find(params[:id], db)
+    halt 404, "Product not found" unless @product
+
+    erb (:"product/edit")
+  end
+
+  post '/products/:id/update' do
+    redirect '/login' unless session[:user_id]
+
+    Product.update(params[:id], params, db)
+
+    redirect '/products'
+  end
+
+  post '/products/:id/delete' do
+    redirect '/login' unless session[:user_id]
+
+    Product.delete(params[:id], db)
+
+    redirect '/products'
   end
 
   post '/checkout' do
@@ -106,7 +164,7 @@ class App < Sinatra::Base
 
     @orders = Order.for_user(session[:user_id], db)
 
-    erb :orders
+    erb (:"checkout/orders")
   end
 
   get '/admin' do
@@ -119,7 +177,7 @@ class App < Sinatra::Base
 
     redirect '/' unless user && user.admin?
 
-    erb :admin
+    erb (:"admin/admin")
   end
 
   get '/logout' do

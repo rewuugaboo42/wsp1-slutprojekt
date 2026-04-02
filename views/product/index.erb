@@ -1,0 +1,33 @@
+<h1>Products</h1>
+
+<% if @admin %>
+  <form action="/products/new" method="get">
+    <button type="submit">Add Product</button>
+  </form>
+<% end %>
+
+<div class="products">
+  <% @products.each do |product| %>
+    <div class="product-card">
+      <h2><%= product.name %></h2>
+      <p class="description"><%= product.description %></p>
+      <p class="price"><%= product.price %> kr</p>
+
+      <form action="/cart/add" method="post">
+        <input type="hidden" name="product_id" value="<%= product.product_id %>">
+        <button type="submit">Add to cart</button>
+      </form>
+      
+      <% if @admin %>
+        <form action="/products/<%= product.product_id %>/edit" method="get">
+          <button type="submit">Edit</button>
+        </form>
+
+        <form action="/products/<%= product.product_id %>/delete" method="post">
+          <input type="hidden" name="_method" value="delete">
+          <button type="submit">Delete</button>
+        </form>
+      <% end %>
+    </div>
+  <% end %>
+</div>

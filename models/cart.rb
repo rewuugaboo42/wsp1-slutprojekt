@@ -35,6 +35,10 @@ class Cart
     end
   end
 
+  def remove_item(product_id, db)
+    cart_item = db.execute("DELETE FROM cart_items WHERE cart_id = ? AND product_id = ?", [cart_id, product_id]).first
+  end
+
   def clear(db)
     db.execute("DELETE FROM cart_items WHERE cart_id = ?", [cart_id])
   end
